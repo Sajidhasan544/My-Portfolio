@@ -1,447 +1,274 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import { contactCards, profile, socialLinks } from '../data/siteData';
+import {
+  ArrowUpRightIcon,
+  FacebookIcon,
+  MailIcon,
+  MapPinIcon,
+  PhoneIcon,
+  SparkIcon,
+  GithubIcon,
+  LinkedinIcon,
+} from '../components/Icons';
+
+const initialState = {
+  name: '',
+  email: '',
+  subject: '',
+  message: '',
+};
+
+const contactIconMap = {
+  mail: MailIcon,
+  phone: PhoneIcon,
+  map: MapPinIcon,
+  spark: SparkIcon,
+};
+
+const socialIconMap = {
+  github: GithubIcon,
+  linkedin: LinkedinIcon,
+  facebook: FacebookIcon,
+};
 
 const Contact = () => {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
+  const [formData, setFormData] = useState(initialState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+
+  const messagePreview = useMemo(() => {
+    const params = new URLSearchParams({
+      subject: formData.subject || 'Portfolio Inquiry',
+      body: `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`,
     });
-    
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitStatus, setSubmitStatus] = useState(null);
 
-    // Animation Variants
-    const fadeInUp = {
-        hidden: { opacity: 0, y: 60 },
-        visible: { opacity: 1, y: 0 }
+    return `mailto:${profile.email}?${params.toString()}`;
+  }, [formData.email, formData.message, formData.name, formData.subject]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    const payload = {
+      ...formData,
+      submittedAt: new Date().toISOString(),
     };
 
-    const fadeInLeft = {
-        hidden: { opacity: 0, x: -60 },
-        visible: { opacity: 1, x: 0 }
-    };
+    window.localStorage.setItem('portfolio-contact-draft', JSON.stringify(payload));
+    window.location.href = messagePreview;
 
-    const fadeInRight = {
-        hidden: { opacity: 0, x: 60 },
-        visible: { opacity: 1, x: 0 }
-    };
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSubmitStatus('success');
+      setFormData(initialState);
+    }, 500);
+  };
 
-    const staggerContainer = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1
-            }
-        }
-    };
-
-    // Handle Input Change
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
-
-    // Handle Form Submit
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        
-        // Simulate form submission
-        setTimeout(() => {
-            setIsSubmitting(false);
-            setSubmitStatus('success');
-            setFormData({ name: '', email: '', subject: '', message: '' });
-            
-            // Reset status after 3 seconds
-            setTimeout(() => setSubmitStatus(null), 3000);
-        }, 1500);
-    };
-
-    // Contact Info Cards
-    const contactInfo = [
-        {
-            icon: '📧',
-            title: 'Email',
-            value: 'sajid.hasan@example.com',
-            link: 'mailto:sajid.hasan@example.com',
-            color: 'from-pink-500 to-purple-500'
-        },
-        {
-            icon: '📱',
-            title: 'Phone',
-            value: '+880 1234 567890',
-            link: 'tel:+8801234567890',
-            color: 'from-blue-500 to-cyan-500'
-        },
-        {
-            icon: '📍',
-            title: 'Location',
-            value: 'Dhaka, Bangladesh',
-            link: 'https://maps.google.com/?q=Dhaka,Bangladesh',
-            color: 'from-purple-500 to-indigo-500'
-        },
-        {
-            icon: '💼',
-            title: 'Freelance',
-            value: 'Available for work',
-            link: null,
-            color: 'from-green-500 to-emerald-500'
-        }
-    ];
-
-    // Social Links
-    const socialLinks = [
-        { name: 'GitHub', icon: '💻', url: 'https://github.com/yourusername', color: 'hover:bg-gray-800' },
-        { name: 'LinkedIn', icon: '🔗', url: 'https://linkedin.com/in/yourusername', color: 'hover:bg-blue-600' },
-        { name: 'Twitter', icon: '🐦', url: 'https://twitter.com/yourusername', color: 'hover:bg-blue-400' },
-        { name: 'Instagram', icon: '📷', url: 'https://instagram.com/yourusername', color: 'hover:bg-pink-600' },
-        { name: 'Facebook', icon: '👤', url: 'https://facebook.com/yourusername', color: 'hover:bg-blue-700' },
-        { name: 'YouTube', icon: '▶️', url: 'https://youtube.com/yourusername', color: 'hover:bg-red-600' },
-    ];
-
-    return (
-        <div className="relative min-h-screen bg-gradient-to-br from-[#0a0014] via-[#140028] to-[#0a0014] pt-24 pb-16">
-            
-            {/* Animated Background Elements */}
-            <div className="absolute inset-0 overflow-hidden">
-                <motion.div
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        x: [0, 40, 0],
-                        y: [0, -40, 0],
-                    }}
-                    transition={{
-                        duration: 8,
-                        repeat: Infinity,
-                        repeatType: "reverse"
-                    }}
-                    className="absolute top-[5%] left-[5%] w-[500px] h-[500px] bg-pink-600/20 rounded-full blur-[150px]"
-                ></motion.div>
-                
-                <motion.div
-                    animate={{
-                        scale: [1, 1.3, 1],
-                        x: [0, -40, 0],
-                        y: [0, 40, 0],
-                    }}
-                    transition={{
-                        duration: 10,
-                        repeat: Infinity,
-                        repeatType: "reverse"
-                    }}
-                    className="absolute bottom-[5%] right-[5%] w-[600px] h-[600px] bg-purple-700/20 rounded-full blur-[180px]"
-                ></motion.div>
-
-                <motion.div
-                    animate={{
-                        scale: [1, 1.1, 1],
-                        rotate: [0, 45, 0],
-                    }}
-                    transition={{
-                        duration: 12,
-                        repeat: Infinity,
-                        repeatType: "reverse"
-                    }}
-                    className="absolute top-[40%] left-[50%] w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[100px]"
-                ></motion.div>
-            </div>
-
-            {/* Grid Pattern */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
-
-            {/* Floating Particles */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {[...Array(50)].map((_, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ 
-                            top: `${Math.random() * 100}%`, 
-                            left: `${Math.random() * 100}%`,
-                            opacity: 0.1 + Math.random() * 0.2
-                        }}
-                        animate={{
-                            y: [0, -50, 0],
-                            x: [0, Math.random() * 40 - 20, 0],
-                        }}
-                        transition={{
-                            duration: 6 + Math.random() * 6,
-                            repeat: Infinity,
-                            delay: Math.random() * 4
-                        }}
-                        className="absolute w-1 h-1 bg-purple-300/30 rounded-full"
-                    />
-                ))}
-            </div>
-
-            {/* Main Content */}
-            <div className="relative z-10 max-w-7xl mx-auto px-6">
-                
-                {/* Header Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="text-center mb-12"
-                >
-                    <h1 className="text-5xl md:text-6xl font-bold mb-4">
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
-                            Get In Touch
-                        </span>
-                    </h1>
-                    <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-                        Have a project in mind? Let's work together to create something amazing.
-                        I'm always open to new opportunities and collaborations.
-                    </p>
-                    <div className="w-24 h-1 bg-gradient-to-r from-pink-500 to-purple-500 mx-auto rounded-full mt-4"></div>
-                </motion.div>
-
-                {/* Contact Info Cards */}
-                <motion.div
-                    variants={staggerContainer}
-                    initial="hidden"
-                    animate="visible"
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12"
-                >
-                    {contactInfo.map((info, index) => (
-                        <motion.div
-                            key={index}
-                            variants={fadeInUp}
-                            whileHover={{ y: -5, scale: 1.02 }}
-                            className="bg-white/5 backdrop-blur-sm p-6 rounded-xl border border-purple-500/20 hover:border-purple-500/50 transition-all group"
-                        >
-                            {info.link ? (
-                                <a href={info.link} target="_blank" rel="noopener noreferrer" className="block">
-                                    <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${info.color} flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform`}>
-                                        {info.icon}
-                                    </div>
-                                    <h3 className="text-white font-semibold mb-1">{info.title}</h3>
-                                    <p className="text-gray-400 text-sm group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r from-pink-400 to-purple-400">
-                                        {info.value}
-                                    </p>
-                                </a>
-                            ) : (
-                                <>
-                                    <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${info.color} flex items-center justify-center text-2xl mb-3`}>
-                                        {info.icon}
-                                    </div>
-                                    <h3 className="text-white font-semibold mb-1">{info.title}</h3>
-                                    <p className="text-gray-400 text-sm">{info.value}</p>
-                                </>
-                            )}
-                        </motion.div>
-                    ))}
-                </motion.div>
-
-                {/* Contact Form & Map Section */}
-                <div className="grid lg:grid-cols-2 gap-8">
-                    
-                    {/* Contact Form */}
-                    <motion.div
-                        variants={fadeInLeft}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        className="bg-white/5 backdrop-blur-sm p-8 rounded-2xl border border-purple-500/20"
-                    >
-                        <h2 className="text-2xl font-bold text-white mb-6">
-                            Send Me a <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Message</span>
-                        </h2>
-
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            {/* Name Input */}
-                            <div>
-                                <label className="block text-gray-400 mb-2 text-sm">Your Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
-                                    placeholder="John Doe"
-                                />
-                            </div>
-
-                            {/* Email Input */}
-                            <div>
-                                <label className="block text-gray-400 mb-2 text-sm">Email Address</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
-                                    placeholder="john@example.com"
-                                />
-                            </div>
-
-                            {/* Subject Input */}
-                            <div>
-                                <label className="block text-gray-400 mb-2 text-sm">Subject</label>
-                                <input
-                                    type="text"
-                                    name="subject"
-                                    value={formData.subject}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
-                                    placeholder="Project Inquiry"
-                                />
-                            </div>
-
-                            {/* Message Input */}
-                            <div>
-                                <label className="block text-gray-400 mb-2 text-sm">Message</label>
-                                <textarea
-                                    name="message"
-                                    value={formData.message}
-                                    onChange={handleChange}
-                                    required
-                                    rows="5"
-                                    className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                                    placeholder="Tell me about your project..."
-                                ></textarea>
-                            </div>
-
-                            {/* Submit Button */}
-                            <motion.button
-                                type="submit"
-                                disabled={isSubmitting}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className={`w-full py-4 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold relative overflow-hidden group ${
-                                    isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
-                                }`}
-                            >
-                                <span className="relative z-10">
-                                    {isSubmitting ? (
-                                        <span className="flex items-center justify-center">
-                                            <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                            </svg>
-                                            Sending...
-                                        </span>
-                                    ) : (
-                                        'Send Message'
-                                    )}
-                                </span>
-                                <motion.div
-                                    className="absolute inset-0 bg-white/20"
-                                    initial={{ x: '-100%' }}
-                                    whileHover={{ x: '100%' }}
-                                    transition={{ duration: 0.5 }}
-                                />
-                            </motion.button>
-
-                            {/* Success Message */}
-                            {submitStatus === 'success' && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="mt-4 p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-green-400 text-center"
-                                >
-                                    ✅ Message sent successfully! I'll get back to you soon.
-                                </motion.div>
-                            )}
-                        </form>
-                    </motion.div>
-
-                    {/* Map & Social Section */}
-                    <motion.div
-                        variants={fadeInRight}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        className="space-y-6"
-                    >
-                        {/* Map */}
-                        <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-purple-500/20 h-[300px] overflow-hidden">
-                            <h3 className="text-xl font-bold text-white mb-4">
-                                Find Me <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Here</span>
-                            </h3>
-                            <div className="w-full h-[200px] bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-lg flex items-center justify-center border border-purple-500/20">
-                                <div className="text-center">
-                                    <span className="text-4xl mb-2 block">📍</span>
-                                    <p className="text-gray-400">Dhaka, Bangladesh</p>
-                                    <p className="text-sm text-gray-500">Google Maps Integration</p>
-                                </div>
-                                {/* Real Google Maps embed code here */}
-                                {/* <iframe src="your-google-maps-embed-url" className="w-full h-full" /> */}
-                            </div>
-                        </div>
-
-                        {/* Social Links */}
-                        <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-purple-500/20">
-                            <h3 className="text-xl font-bold text-white mb-4">
-                                Connect With <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Me</span>
-                            </h3>
-                            <p className="text-gray-400 text-sm mb-4">
-                                Follow me on social media for updates and insights
-                            </p>
-                            <div className="grid grid-cols-3 gap-3">
-                                {socialLinks.map((social, index) => (
-                                    <motion.a
-                                        key={index}
-                                        href={social.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        whileHover={{ scale: 1.05, y: -2 }}
-                                        className={`p-4 bg-white/5 rounded-xl text-center group transition-all duration-300 hover:bg-opacity-20 border border-purple-500/20 hover:border-purple-500/50 ${social.color}`}
-                                    >
-                                        <span className="text-2xl mb-1 block group-hover:scale-110 transition-transform">
-                                            {social.icon}
-                                        </span>
-                                        <span className="text-xs text-gray-400 group-hover:text-white">
-                                            {social.name}
-                                        </span>
-                                    </motion.a>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Availability Status */}
-                        <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 backdrop-blur-sm p-6 rounded-2xl border border-purple-500/30"
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                                    <span className="text-2xl">⚡</span>
-                                </div>
-                                <div>
-                                    <h4 className="text-white font-semibold">Currently Available for Work</h4>
-                                    <p className="text-gray-400 text-sm">I'm open to freelance projects and full-time opportunities</p>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                </div>
-
-                {/* FAQ Section (Optional) */}
-                <motion.div
-                    variants={fadeInUp}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}
-                    className="mt-16 text-center"
-                >
-                    <p className="text-gray-400">
-                        Prefer email? Reach me directly at{' '}
-                        <a href="mailto:sajid.hasan@example.com" className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 hover:underline">
-                            sajid.hasan@example.com
-                        </a>
-                    </p>
-                </motion.div>
-            </div>
+  return (
+    <section className="section pb-20">
+      <div className="shell">
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="chip mb-4">
+              <MailIcon className="mr-2 h-3.5 w-3.5" />
+              Contact
+            </p>
+            <h1 className="section-title">Let&apos;s make your portfolio or website feel more premium.</h1>
+          </div>
+          <p className="section-copy">
+            Share your idea, redesign need, or collaboration plan. The form opens your email client
+            and also keeps a local draft in the browser for convenience.
+          </p>
         </div>
-    );
+
+        <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {contactCards.map((card, index) => {
+            const content = (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: index * 0.06 }}
+                className="glass-panel h-full p-5"
+              >
+                <div className="icon-badge mb-4">
+                  {(() => {
+                    const Icon = contactIconMap[card.icon];
+                    return Icon ? <Icon className="h-5 w-5" /> : null;
+                  })()}
+                </div>
+                <p className="text-xs uppercase tracking-[0.22em] text-slate-400">{card.title}</p>
+                <p className="mt-3 text-sm leading-6 text-white">{card.value}</p>
+              </motion.div>
+            );
+
+            return card.href ? (
+              <a key={card.title} href={card.href} target={card.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
+                {content}
+              </a>
+            ) : (
+              <div key={card.title}>{content}</div>
+            );
+          })}
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="glass-panel p-6 sm:p-8">
+            <div className="icon-badge mb-4">
+              <SparkIcon className="h-5 w-5" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Send a message</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-300">
+              Fill this out and your device will open an email draft addressed to me. That makes
+              the section actually usable even without a backend setup.
+            </p>
+
+            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <label className="block text-sm text-slate-300">
+                  Name
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-white outline-none transition focus:border-white/25"
+                    placeholder="Your name"
+                  />
+                </label>
+                <label className="block text-sm text-slate-300">
+                  Email
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-white outline-none transition focus:border-white/25"
+                    placeholder="you@example.com"
+                  />
+                </label>
+              </div>
+
+              <label className="block text-sm text-slate-300">
+                Subject
+                <input
+                  type="text"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-white outline-none transition focus:border-white/25"
+                  placeholder="What do you need help with?"
+                />
+              </label>
+
+              <label className="block text-sm text-slate-300">
+                Message
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  rows="6"
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-white outline-none transition focus:border-white/25"
+                  placeholder="Tell me about your project, goals, and what you want improved."
+                />
+              </label>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  <MailIcon className="h-4 w-4" />
+                  {isSubmitting ? 'Preparing draft...' : 'Open Email Draft'}
+                </button>
+                <a
+                  href={messagePreview}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 bg-white/6 px-6 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  <ArrowUpRightIcon className="h-4 w-4" />
+                  Preview Draft
+                </a>
+              </div>
+
+              {submitStatus === 'success' && (
+                <p className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200">
+                  Your message draft was prepared and a local backup copy was saved in the browser.
+                </p>
+              )}
+            </form>
+          </div>
+
+          <div className="space-y-6">
+            <div className="glass-panel p-6 sm:p-8">
+              <div className="icon-badge mb-4">
+                <SparkIcon className="h-5 w-5" />
+              </div>
+              <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Why work with me</p>
+              <h2 className="mt-3 text-2xl font-bold text-white">Focused on clarity, speed, and details that feel intentional.</h2>
+              <div className="mt-6 space-y-4 text-sm leading-7 text-slate-300">
+                <p>I can improve rough portfolio projects into something cleaner, smoother, and easier to trust visually.</p>
+                <p>I care about spacing, typography, section flow, responsive behavior, and interactions that do not feel heavy.</p>
+                <p>If you already have a project, I can refine both how it looks and how it behaves.</p>
+              </div>
+            </div>
+
+            <div className="glass-panel p-6 sm:p-8">
+              <div className="icon-badge mb-4">
+                <ArrowUpRightIcon className="h-5 w-5" />
+              </div>
+              <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Social</p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.name}
+                    href={social.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-2xl border border-white/10 bg-white/6 px-4 py-4 text-center transition hover:bg-white/10"
+                  >
+                    <div className="mb-2 flex justify-center">
+                      {(() => {
+                        const Icon = socialIconMap[social.icon];
+                        return Icon ? <Icon className="h-5 w-5 text-amber-100" /> : null;
+                      })()}
+                    </div>
+                    <p className="text-sm font-semibold text-white">{social.name}</p>
+                    <p className="mt-1 text-xs text-slate-400">{social.handle}</p>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-panel p-6 sm:p-8">
+              <div className="icon-badge mb-4">
+                <MapPinIcon className="h-5 w-5" />
+              </div>
+              <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Direct Contact</p>
+              <a href={`mailto:${profile.email}`} className="mt-4 block text-lg font-semibold text-white hover:text-amber-200">
+                {profile.email}
+              </a>
+              <p className="mt-3 text-sm text-slate-400">{profile.location}</p>
+              <p className="mt-2 text-sm text-slate-400">{profile.availability}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default Contact;
